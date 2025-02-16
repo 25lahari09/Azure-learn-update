@@ -138,8 +138,85 @@ PART 2:::::::::::::::::::::Creating THE AZURE STORAGE GEN 2 AS A LINKED SERVICEE
 
 here we use the autoresolve integration runtime because the stirage account here we create as a linked \
 service in azure data factory doesnot belong to the on premises so we use AutoResolveRunTime
+ Account Selection Method
+From Azure Subscription ✅ (Recommended)
+ADF will automatically detect the storage accounts you have access to.
+Easier because you don’t need to manually type storage details.
+Enter Manually (Only if required)
+You would use this if the storage account is in a different subscription.
+Requires you to manually enter the 
+
+NOTE: [[[[[ THE SECOND TIME I VISITED AFTER CREATION I OBSERVED THERE IS A STORAGEKEY AND URL WITHOUT
+ENTERING THEM FIRST TIME]]]]]]]]
 
 
-
+PART 3: CREATING Copy Data Pipeline in ADF
 here we have options like: author , monitor, manage, learning center
 AUTHOR
+To copy data from SQL Server into Azure Data Lake Storage Gen2.
+
+Steps:
+
+Created a new dataset for the source SQL table.
+
+Navigated to Author → Datasets → + New.
+
+Selected Azure SQL Database.
+
+Linked Service: Hardcoded_SQL_LS
+
+Selected SalesLT.Customer table.
+
+Created a new Linked Service for Azure Data Lake Storage.
+
+Navigated to Connections → Linked Services → + New.
+
+Selected Azure Data Lake Storage Gen2.
+
+Name: Azure_DATALAKE_LS
+
+Authentication Type: Account Key.
+
+Storage Account Name: Selected manually.
+
+Successfully tested the connection.
+
+Configured Sink Dataset:
+
+Navigated to Author → Datasets → + New.
+
+Selected Azure Data Lake Storage Gen2.
+
+Chose DelimitedText format (.txt file).
+
+Configured file path: /AdventureWorks/SalesLT.Customer.txt.
+
+Encountered Error:
+
+"The specified container name 'Adventureworks' contains invalid characters."
+
+Resolution:
+
+Renamed the container to adventureworks (all lowercase).
+
+Updated file path accordingly.
+
+Successfully re-tested connection.
+
+Created and Ran the Copy Data Pipeline:
+
+Navigated to Author → Pipelines → + New.
+
+Added a Copy Data Activity.
+
+Configured Source as SQL_Source_Dataset.
+
+Configured Sink as DelimitedText1 (pointing to ADLS Gen2).
+
+Selected integrationRuntime1 for execution.
+
+Pipeline Name: Copy_SQL_To_DataLake
+
+Execution Time: 32 seconds
+
+Status: ✅ Succeeded

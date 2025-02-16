@@ -21,10 +21,125 @@ we give name for exmaple i gave Name: hardcoded_sql_LS ;
 So here while selecting Connect via integration runtime: we have two options like:
 1)AutoResolveIntegrationRuntime : FOR CONNECTING ANY CLOUD BASED SERVICE
 2)Integration Runtime : FOR CONNECTING ANY ONPREMISE SERVICE
+
+( To deal with integration run time we have to first allow ADF to communicate with your laptop’s SQL Server:
+to do this : 
+Go to Azure Portal → Open Azure Data Factory.
 ADF Cannot Directly Access On-Premises SQL Server
 ADF is a cloud service, and your local SQL Server is not directly accessible from the cloud. You need to use an Integration Runtime (IR) to create a bridge between Azure and your local database.
-after we have to select 
-since i am connecting to on premise service i am now connecting to Integration Runtime
+after we have to select ;since i am connecting to on premise service i am now connecting to Integration Runtime
+2️⃣ Go to "Manage" (Gear Icon) → Click Integration Runtimes.
+3️⃣  Click + New → Select "Self-Hosted" Integration Runtime(if ypu want a new integration rum time).
+4️⃣ Click "Download and Install" → Install it on your laptop (where SQL Server is running).
+5️⃣ During setup, it will ask for an Authentication Key → Copy it from ADF and paste the key it into the installer.
+6️⃣ Once installed, it should show "Running" in Azure.
+[[[[[[[  my practice:
+Name*: Hardcoded_SQL_LS
+Description: Here, we are hardcoding the username and password, which is not secure but is done for learning purposes.
+Connect via integration runtime*: integrationRuntime1
+Account selection method:From Azure subscription/Enter manually( select enter manually)
+Fully qualified domain name*: HELLO/SQLEXPRESS
+Database name*:AdventureWorksLT2022
+Authentication type*: SQL authentication
+User name*:lahari
+Password*:..........
+chexk the trusted certificate
+test connection
+So intially when i tested connection here i got an ERROR:
+Cannot connect to SQL Database. Please contact SQL server team for further support. Server: 'HELLO/SQLEXPRESS', Database: 'AdventureWorksLT2022', User: 'lahari'. Check the linked service configuration is correct, and make sure the SQL Database firewall allows the integration runtime to access.
+A connection was successfully established with the server, but then an error occurred during the login process. (provider: Shared Memory Provider, error: 0 - No process is on the other end of the pipe.)
+:::::::::::::::::::::::::ERROR:::::::::::::::::::::::::::::::
+No process is on the other end of the pipe
+
+Why Are You Getting This Error?
+The error "No process is on the other end of the pipe" usually happens because SQL Server is not allowing the login from Azure Data Factory. Here’s what’s likely causing the issue and how to fix it.
+
+✅ Step-by-Step Fix
+1️⃣ Make Sure SQL Server Authentication is Enabled
+By default, SQL Server only allows Windows Authentication. Since you are using a SQL login (lahari), you need to enable SQL Server Authentication.
+
+🛠 How to Enable SQL Authentication:
+Open SQL Server Management Studio (SSMS) and connect to HELLO\SQLEXPRESS.
+Right-click on the server name (HELLO\SQLEXPRESS) → Select "Properties".
+Go to the "Security" tab.
+Under "Server authentication", select "SQL Server and Windows Authentication mode".
+Click OK and restart SQL Server:
+Open Services.msc
+Find SQL Server (SQLEXPRESS)
+Right-click and Restart
+🔄 Test again in ADF after this step.
+2️⃣ Check If Your User (lahari) Has Proper Permissions
+Even if SQL Authentication is enabled, the user lahari might not have permission to log in.
+
+🛠 How to Grant Access to lahari:
+In SSMS, go to Security → Logins.
+Right-click on lahari → Select "Properties".
+Go to "Server Roles" → Check sysadmin (for full access, or public + db_owner for limited access).
+Go to "User Mapping" → Make sure lahari has access to AdventureWorksLT2022.
+Click OK and try again.
+3️⃣ Ensure TCP/IP is Enabled in SQL Server Configuration
+Since ADF runs on your self-hosted integration runtime, it needs to communicate over TCP/IP, not Named Pipes.
+
+🛠 How to Enable TCP/IP:
+Open SQL Server Configuration Manager.
+Expand SQL Server Network Configuration → Click Protocols for SQLEXPRESS.
+Right-click "TCP/IP" → Click "Enable".
+Restart SQL Server Service (again from Services.msc).
+🔄 Try the connection again in ADF.
+
+4️⃣ Check Windows Firewall and Allow Port 1433
+Even if everything is configured, your Windows firewall might be blocking ADF’s access.
+
+🛠 How to Open Port 1433 for SQL Server:
+Open Windows Defender Firewall → Click Advanced Settings.
+Go to Inbound Rules → Click New Rule.
+Select Port → Click Next.
+Choose TCP → Type 1433 in "Specific local ports" → Click Next.
+Select Allow the connection → Click Next.
+Apply to Domain, Private, and Public → Click Next.
+Name it SQL Server 1433 → Click Finish.
+🔄 Test again in ADF.
+
+🛠 Final Troubleshooting Steps
+If the error still persists, try these:
+✅ In ADF, change HELLO\SQLEXPRESS to 127.0.0.1,1433 (forcing TCP/IP).
+✅ Ensure SQL Browser Service is running in Services.msc.
+✅ Manually create the login again in SQL:
+
+sql
+Copy
+Edit
+USE master;
+GO
+CREATE LOGIN lahari WITH PASSWORD = '9492466919';
+GO
+USE AdventureWorksLT2022;
+GO
+CREATE USER lahari FOR LOGIN lahari;
+GO
+ALTER ROLE db_owner ADD MEMBER lahari;
+GO
+🔄 Try reconnecting in ADF after these steps.
+
+🚀 Summary
+✅ Enable SQL Server Authentication.
+✅ Grant lahari login permissions in SQL Server.
+✅ Enable TCP/IP in SQL Server Configuration Manager.
+✅ Allow Port 1433 in the Firewall.
+✅ Try connecting with 127.0.0.1,1433 instead of HELLO\SQLEXPRESS.
+After i tried this step 1 i got error again when i am testing the connection: now i am going to verify step 2
+AFTER STEP 2 : Updated user permissions in SQL Server Management Studio (SSMS):
+Security → Logins → lahari → Server Roles → sysadmin.
+Security → Logins → lahari → User Mapping → Assigned access to AdventureWorksLT2022.
+=================================> AFTER I DID STEP 2  I GOT SUCCEEDED<================================
+TEST CONNECTION IS SUCCESSFUL.
+
+PART 2:::::::::::::::::::::Creating THE AZURE STORAGE GEN 2 AS A LINKED SERVICEE::::::::::::::::::
+
+here we use the autoresolve integration runtime because the stirage account here we create as a linked \
+service in azure data factory doesnot belong to the on premises so we use AutoResolveRunTime
+
+
 
 here we have options like: author , monitor, manage, learning center
 AUTHOR

@@ -1,1 +1,30 @@
+❌ Hardcoding = Manually entering credentials in ADF (not secure).
+✅ Best Practice = Store credentials in Key Vault & let ADF fetch them securely.
 
+WHAT AM I DOING:
+Data Ingestion from On-Premises SQL Server to Azure Data Lake using Azure Data Factory( USING HARDCODED AUTHENTICATION WITHOUT ANY KEY VALUT):
+
+So to ingest data from onpremise SQL server to Azure Data Lake , first we create an azure data factory in azure resource and the data is loaded into azure data lake g2( which is in cloud now ===IMPORTANT)
+
+STEP1:
+Setting Up the SQL Server Connection in ADF
+
+Objective:To create a secure connection between the "on-premises" SQL Server and Azure Data Factory.
+
+
+AZURE DATA FACTORY======> INSTANCE(BY CLICKING LAUNCH STUDIO)=====>
+CONNECTIONS(LINKED SERVICES)========>+ 
+now we can select the linked service we need, here we select AZURE SQL DATABASE 
+we give name for exmaple i gave Name: hardcoded_sql_LS ; 
+
+::::::::::::::::::::::::::::::::::::::::IMPORTANT:::::::::::::::::::::::::::::::::::
+So here while selecting Connect via integration runtime: we have two options like:
+1)AutoResolveIntegrationRuntime : FOR CONNECTING ANY CLOUD BASED SERVICE
+2)Integration Runtime : FOR CONNECTING ANY ONPREMISE SERVICE
+ADF Cannot Directly Access On-Premises SQL Server
+ADF is a cloud service, and your local SQL Server is not directly accessible from the cloud. You need to use an Integration Runtime (IR) to create a bridge between Azure and your local database.
+after we have to select 
+since i am connecting to on premise service i am now connecting to Integration Runtime
+
+here we have options like: author , monitor, manage, learning center
+AUTHOR
